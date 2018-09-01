@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body class="layui-bg-cyan">
+		<div class="layui-row" style="margin-top: 100px;">
+			<div class="layui-col-md4" style="height: 400px;">
+				
+			</div>
+			<div class="layui-col-md4" style="height: 500px; background-color: white;border-radius: 50px;">
+				<div class="layui-row" style='margin-top: 30px;font-size: 40px;font-weight: 100; font-family: YouYuan; color: black;text-align: center;'>
+					注册
+				</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input id="nickname" placeholder="nickname" type="text" class="layui-col-md8" style="margin-top: 50px;height: 40px;border-radius: 10px; border: 1px solid #c2c2c2;"  />
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input id="username" placeholder="account" type="text" class="layui-col-md8" style="margin-top: 50px;height: 40px; border-radius: 10px; border: 1px solid #c2c2c2;"  />
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input id="password" placeholder="password" type="password" class="layui-col-md8" style="margin-top: 50px;height: 40px;border-radius: 10px; border: 1px solid #c2c2c2;"  />
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input type="button" class="layui-btn layui-col-md8" style="height: 100%;margin-top: 50px;" value="提交" onclick="go()"/>
+						<!-- <a href="#" class="layui-btn layui-col-md8" style="height: 100%;margin-top: 50px;">登录</a> -->
+					</div>
+			</div>
+			<div class="layui-col-md4" style="height: 400px;">
+				
+			</div>
+		</div>
+	</body>
+	<script src="layui/layui.js"></script>
+	<script src="/js/jquery-3.3.1.min.js"></script>
+	<script>
+		layui.use(['layer', 'form'], function() {
+			var layer = layui.layer,
+				form = layui.form;
+			//layer.msg('Hello World');
+		});
+		layui.use('element', function() {
+			var element = layui.element;
+		});
+		function go(){
+			var form = new FormData();
+			form.append("nickname", document.getElementById("nickname").value);
+			form.append("username", document.getElementById("username").value);
+			form.append("password", document.getElementById("password").value);
+			$(function(){
+				$.ajax({
+					url: "/API/addUser",
+					type: "post",
+					data: form,
+					processData : false,
+					contentType : false,
+					//contentType: "application/json;charset=UTF-8",
+		            success: function(response){
+		            	console.log("suc");
+		            	layer.msg('好了');
+			            //$('#context').html(testEditor.getHTML());
+		            },
+		            error: function(XMLHttpRequest, textStatus, errorThrown){
+						console.log("error");
+						layer.msg('shibaile');
+		            }
+				})
+			});
+		}
+	</script>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title id="tt"></title>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<!--
+        	作者：921856150@qq.com
+        	时间：2018-08-25
+        	描述：-->
+<link rel="stylesheet" href="/editormd/css/editormd.min.css" />
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/editormd/js/editormd.min.js"></script>
+</head>
+<body>
+	<div th:replace="head::head"></div>
+	<div class="layui-container">
+		<div id="title" class="layui-row"
+			style="font-size: 50px; text-align: center; margin-top: 30px;"></div>
+		<div class="layui-row" style="margin-top: 30px;">
+			<div class="layui-col-md2" style="height: 1px;"></div>
+			<div id="context" class="layui-col-md8">
+				<textarea id="t1" style="display: none;"></textarea>
+			</div>
+			<div class="layui-col-md2"></div>
+		</div>
+		<div class="layui-row" style="margin-top: 30px;">
+			<div class="layui-col-md2" style="height: 1px;"></div>
+			<div id="comment" class="layui-col-md8">
+				<div class="layui-row" style="color: #c2c2c2;">
+					这里是评论区~
+					<hr />
+				</div>
+				<div class="layui-row"></div>
+			</div>
+			<div class="layui-col-md2"></div>
+		</div>
+	</div>
+	<script src='http://cdn.bootcss.com/marked/0.3.2/marked.min.js'></script>
+	<script src="/layui/layui.js"></script>
+	<script>
+		layui.use([ 'layer', 'form' ], function() {
+			var layer = layui.layer, form = layui.form;
+			layer.msg('Hello World');
+		});
+		layui.use('element', function() {
+			var element = layui.element;
+		});
+	</script>
+	<script type="text/javascript">
+		/*这里markdown的添加~*/
+		//$(function() {
+		//$('#content').bind('input propertychange', function() {
+		//$('#context').html(marked("# 我是六级标题的第六级"));
+		//console.log(window.location.href);
+		//}).trigger('input');
+		//});
+		getArticle();
+		function getArticle() {
+			var url1 = "/API/getArticle/";
+			var num = window.location.href.lastIndexOf('/');
+			num = Number(num + 1);
+			num = window.location.href.substring(num,
+					window.location.href.lenth);
+			url1 = url1 + num;
+			$(function() {
+				$.ajax({
+					url : url1,
+					type : "get",
+					dataType : "json",
+					//contentType: "application/json;charset=UTF-8",
+					success : function(response) {
+						console.log("suc");
+						$('#title').html(response.title);
+						$('#tt').html(response.title);
+						$('#t1').html(response.content);
+						editormd.markdownToHTML("context", {
+							htmlDecode : "style,script,iframe", //可以过滤标签解码
+							emoji : true,
+							taskList : true,
+							tex : true, // 默认不解析
+							flowChart : true, // 默认不解析
+							sequenceDiagram : true, // 默认不解析
+						});
+						//$('#context').html(testEditor.getHTML());
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						console.log("error");
+					}
+				})
+			});
+		}
+
+		/*var testEditor;
+
+		$(function() {
+		    testEditor = editormd("context", {
+		        width   : "90%",
+		        height  : 640,
+		        syncScrolling : "single",
+		        path    : "/editormd/lib/"
+		    });
+		    });*/
+	</script>
+</body>
+</html>

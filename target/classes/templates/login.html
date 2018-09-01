@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="layui/css/layui.css">
+	</head>
+	<body class="layui-bg-cyan">
+		<div class="layui-row" style="margin-top: 100px;">
+			<div class="layui-col-md4" style="height: 400px;">
+				
+			</div>
+			<div class="layui-col-md4" style="height: 500px; background-color: white;border-radius: 50px;">
+				<div class="layui-row" style='margin-top: 30px;font-size: 40px;font-weight: 100; font-family: YouYuan; color: black;text-align: center;'>
+					登录
+				</div>
+				<form action="" method="post">
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input name="username" placeholder="account" type="text" class="layui-col-md8" style="margin-top: 50px;height: 40px; border-radius: 10px; border: 1px solid #c2c2c2;"  />
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input name="password" placeholder="password" type="password" class="layui-col-md8" style="margin-top: 50px;height: 40px;border-radius: 10px; border: 1px solid #c2c2c2;"  />
+					</div>
+					<div class="layui-row" style="margin-top:30px;color:black;">
+						<!-- <input type="text" value="false" name="rememberMe">  -->
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input type="checkbox" value="true" name="rememberMe"/>rememberMe
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<input type="submit" class="layui-btn layui-col-md8" style="height: 100%;margin-top: 50px;" value="登录"/>
+						<!-- <a href="#" class="layui-btn layui-col-md8" style="height: 100%;margin-top: 50px;">登录</a> -->
+					</div>
+					<div class="layui-row">
+						<div class="layui-col-md2" style="height: 1px;"></div>
+						<a href="/regest" class="layui-btn layui-col-md8 layui-bg-red" style="height: 100%;margin-top: 50px;">注册</a>
+					</div>
+					<input type="hidden" name="vcode" value=""/>
+					
+				</form>
+			</div>
+			<div class="layui-col-md4" style="height: 400px;">
+				
+			</div>
+		</div>
+	</body>
+	<script src="layui/layui.js"></script>
+	<script>
+		layui.use(['layer', 'form'], function() {
+			var layer = layui.layer,
+				form = layui.form;
+			//layer.msg('Hello World');
+		});
+		layui.use('element', function() {
+			var element = layui.element;
+		});
+	</script>
+</html>
