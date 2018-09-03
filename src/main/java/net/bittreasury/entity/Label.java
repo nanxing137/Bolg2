@@ -15,6 +15,12 @@ import javax.persistence.ManyToMany;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+/**
+ * 标签</br>
+ * 和文章是多对多
+ * @author Thornhill
+ *
+ */
 @Entity
 public class Label implements Serializable {
 	@Id

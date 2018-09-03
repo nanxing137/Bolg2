@@ -41,13 +41,18 @@ public class User implements Serializable {
 	// 昵称
 	@Column
 	private String nickName;
+
+	@JSONField(serialize = false)
 	@Column(nullable = false)
 	private String password;
 
+	@JSONField(serialize = false)
 	@Column
 	private String address;
+	@JSONField(serialize = false)
 	@Column
 	private String email;
+	@JSONField(serialize = false)
 	@Column
 	private String phoneNumber;
 	// 个性签名
@@ -57,9 +62,11 @@ public class User implements Serializable {
 	@Column
 	private String personalStatement;
 	// 注册日期
+	@JSONField(serialize = false)
 	@Column
 	private Date registratioDate = new Date();
 	// 最后活跃
+	@JSONField(serialize = false)
 	@Column
 	private Date lastActive;
 
@@ -75,7 +82,7 @@ public class User implements Serializable {
 	private Set<Article> articles = new HashSet<>();
 
 	// 附件列表
-	// @JsonIgnore
+	@JSONField(serialize = false)
 	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "author")
 	private Set<Annex> annexs = new HashSet<>();
 
