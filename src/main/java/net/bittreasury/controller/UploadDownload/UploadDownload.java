@@ -72,7 +72,7 @@ public class UploadDownload {
 				dest.getParentFile().mkdirs();// 新建文件夹
 			}
 			file.transferTo(dest);// 文件写入
-			return "上传成功";
+			return fileName + suffixName;
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -109,8 +109,9 @@ public class UploadDownload {
 	}
 
 	// 文件下载相关代码
-	@RequestMapping("API/download/{fileName}")
-	public String downloadFile(@PathVariable("fileName") String fileName, HttpServletRequest request,
+//	@RequestMapping("API/download/{fileName}")
+	@RequestMapping("API/download")
+	public String downloadFile(@RequestParam("fileName") String fileName, HttpServletRequest request,
 			HttpServletResponse response) {
 		// String fileName = "aim_test.txt";// 设置文件名，根据业务需要替换成要下载的文件名
 		if (fileName != null) {

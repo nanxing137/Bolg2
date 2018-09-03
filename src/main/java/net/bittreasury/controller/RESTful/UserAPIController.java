@@ -18,25 +18,25 @@ public class UserAPIController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping("API/getUserById/{id}")
+	@RequestMapping("api/getUserById/{id}")
 	public User getUserById(@PathVariable Long id) {
 		User userById = userService.getUserById(id);
 		return userById;
 	}
 
-	@RequestMapping("API/getRandomUser/{count}")
+	@RequestMapping("api/getRandomUser/{count}")
 	public List<User> getRandomUser(@PathVariable("count") Integer count) {
 		List<User> randomUsers = userService.getRandomUsers(count);
 		return randomUsers;
 	}
 
-	@RequestMapping("API/user")
+	@RequestMapping("api/user")
 	public User usertest() {
 		User acount = (User) SecurityUtils.getSubject().getPrincipal();
 		return acount;
 	}
 
-	@RequestMapping("API/addUser")
+	@RequestMapping("api/addUser")
 	public User addUser(User user) {
 		user.setRegistratioDate(new Date());
 		User addUser = userService.addUser(user);

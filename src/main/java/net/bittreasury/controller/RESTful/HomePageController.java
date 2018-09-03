@@ -15,7 +15,7 @@ public class HomePageController {
 	@Autowired
 	private ArticleService articleService;
 
-	@RequestMapping("API/articles")
+	@RequestMapping("api/articles")
 	public List<Article> articles() {
 		List<Article> allArticles = articleService.findAllArticles();
 		System.out.println(allArticles);

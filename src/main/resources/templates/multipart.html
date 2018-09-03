@@ -11,7 +11,10 @@
 	<form action="/API/upload" method="POST" enctype="multipart/form-data">
 		文件：<input type="file" name="file" /> <input type="submit" />
 	</form>
-	<a href="/API/download/xxx">下载test</a>
+	<form action="/API/download">
+		<input type="text" name="fileName">
+		<input type="submit" name="下载">
+	</form>
 	<p>多文件上传</p>
 	<form method="POST" enctype="multipart/form-data"
 		action="/API/batch/upload">

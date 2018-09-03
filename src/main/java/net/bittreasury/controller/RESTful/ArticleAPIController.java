@@ -28,7 +28,7 @@ public class ArticleAPIController {
 	 * @param folderId
 	 * @return
 	 */
-	@RequestMapping("API/addArticle/{folderId}")
+	@RequestMapping("api/addArticle/{folderId}")
 	public Article addArticle(@PathVariable("folderId") Long folderId) {
 		Article article = new Article();
 
@@ -43,7 +43,7 @@ public class ArticleAPIController {
 		return article;
 	}
 
-	@RequestMapping("API/updateArticle")
+	@RequestMapping("api/updateArticle")
 	public Article updateArticle(Article article) {
 		Article updateArticle = articleService.updateArticle(article);
 		return updateArticle;
@@ -56,45 +56,45 @@ public class ArticleAPIController {
 	 * @param page
 	 * @return
 	 */
-	@RequestMapping("API/getAllArticles/{size}/{page}")
+	@RequestMapping("api/getAllArticles/{size}/{page}")
 	public List<Article> getAllArticles(@PathVariable("size") Integer size, @PathVariable("page") Integer page) {
 		List<Article> findAllArticles = articleService.getArticlesByPage(size, page - 1);
 		return findAllArticles;
 	}
 
-	@RequestMapping("API/getCount")
+	@RequestMapping("api/getCount")
 	public Double count() {
 		Long sum = articleService.getSum();
 		double ceil = Math.ceil(sum / 3);
 		return ceil;
 	}
 
-	@RequestMapping("API/getArticle/{id}")
+	@RequestMapping("api/getArticle/{id}")
 	public Article getArticle(@PathVariable("id") Long id) {
 		Article articleById = articleService.getArticleById(id);
 		return articleById;
 	}
 
-	@RequestMapping("API/getHotArticle")
+	@RequestMapping("api/getHotArticle")
 	public List<Article> getHotArticle() {
 		List<Article> hotArticles = articleService.getHotArticles();
 		return hotArticles;
 	}
 
-	@RequestMapping("API/getArticleBySelf")
+	@RequestMapping("api/getArticleBySelf")
 	public List<Article> getArticleBySelf() {
 		User user = (User) SecurityUtils.getSubject().getPrincipal();
 		List<Article> getArticleByUser = articleService.getArticleByUser(user);
 		return getArticleByUser;
 	}
 
-	@RequestMapping("API/getArticlesByTime")
+	@RequestMapping("api/getArticlesByTime")
 	public List<Article> getArticlesByTime() {
 		List<Article> articlesByTime = articleService.getArticlesByTime();
 		return articlesByTime;
 	}
 	
-	@RequestMapping("API/getArticlesByLabel/{id}")
+	@RequestMapping("api/getArticlesByLabel/{id}")
 	public List<Article> getArticlesByLabel(@PathVariable("id") Long id){
 		List<Article> articlesByLabel = articleService.getArticlesByLabelId(id);
 		return articlesByLabel;

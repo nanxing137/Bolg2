@@ -15,7 +15,7 @@ public class LabelAPIController {
 	@Autowired
 	private LabelService labelService;
 	
-	@RequestMapping("API/getAllLebels")
+	@RequestMapping("api/getAllLebels")
 	List<Label> getAllLebels(){
 		List<Label> all = labelService.getAll();
 		return all;
