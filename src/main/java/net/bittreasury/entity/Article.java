@@ -40,7 +40,7 @@ public class Article implements Serializable {
 			CascadeType.MERGE }, fetch = FetchType.EAGER, optional = true)
 	private User author;
 	// 标签
-	@ManyToMany(mappedBy = "articles")
+	@ManyToMany(mappedBy = "articles", fetch = FetchType.EAGER)
 	private Set<Label> labels;
 	// 分类
 	@ManyToOne(targetEntity = Classification.class, cascade = { CascadeType.PERSIST,
@@ -258,4 +258,5 @@ public class Article implements Serializable {
 	public void setLabels(Set<Label> labels) {
 		this.labels = labels;
 	}
+
 }

@@ -1,12 +1,15 @@
 package net.bittreasury.controller.RESTful;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,28 +21,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-
 import net.bittreasury.entity.Article;
-import net.bittreasury.entity.Label;
 import net.bittreasury.entity.User;
 import net.bittreasury.service.ArticleService;
-import net.bytebuddy.asm.Advice.Return;
+import net.bittreasury.utils.FastMap;
+
+import static java.util.stream.Collectors.*;
+
+import java.util.ArrayList;
 
 @RestController
 public class ArticleAPIController {
+
+	// 线程级别的缓存
+	// 注意这里有待改进
+	private ThreadLocal<List<Article>> articlesCache = new ThreadLocal<>();
 
 	private final Comparator<Article> hot = (t1, t2) -> {
 		return (t1.getClickQuantity() > t2.getClickQuantity()) ? 1
 				: (t1.getClickQuantity() == t2.getClickQuantity() ? 0 : -1);
 	};
+	// private final Comparator<Article> time = (t1, t2) -> {
+	// return t1.getCreationDate().compareTo(t2.getCreationDate());
+	// };
 	private final Comparator<Article> time = (t1, t2) -> {
-		return t1.getCreationDate().compareTo(t1.getCreationDate());
-		// return (t1.getCreationDate().getTime() > t2.getCreationDate().getTime()) ? 1
-		// : (t1.getCreationDate().equals(t2.getCreationDate()) ? 0 : -1);
+		return t1.getCreationDate().compareTo(t2.getCreationDate()) * -1;
 	};
-
+	private final Comparator<Article> year = (t1, t2) -> {
+		int year1 = t1.getCreationDate().getYear();
+		int year2 = t2.getCreationDate().getYear();
+		return year1 > year2 ? 1 : year1 == year2 ? 0 : -1;
+	};
+	private final BiFunction<Predicate<Article>, Predicate<Article>, Predicate<Article>> andOP = (t1, t2) -> {
+		return t1.and(t2);
+	};
 	@Autowired
 	private ArticleService articleService;
 
@@ -58,12 +73,14 @@ public class ArticleAPIController {
 	public List<Article> getg(@RequestParam("sort") String sort, @RequestParam("classification") Long classificationId,
 			@RequestParam("label") Long[] labels, @RequestParam("size") Long size, @RequestParam("page") Long page) {
 
-		List<Article> findAllArticles = articleService.findAllArticles();
+		// List<Article> findAllArticles = articleService.findAllArticles();
+		List<Article> findAllArticles = getAllArticles();
+
 		/**
 		 * 按热度或者按时间排序</br>
 		 * 默认热度
 		 */
-		Comparator<Article> comparator = hot;
+		Comparator<Article> comparator;
 		switch (sort) {
 		case "hot":
 			comparator = hot;
@@ -72,9 +89,11 @@ public class ArticleAPIController {
 			comparator = time;
 			break;
 		default:
+			comparator = hot;
 			break;
 		}
-		Stream<Article> stream = findAllArticles.stream();
+		// 先用并行流，出了问题检查这里
+		Stream<Article> stream = findAllArticles.parallelStream();
 		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
 		/**
 		 * 1. 通过条件过滤</br>
@@ -84,8 +103,68 @@ public class ArticleAPIController {
 		stream = stream.filter(finalPredicate);
 		stream = stream.sorted(comparator);
 		stream = stream.skip((page - 1) * size).limit(size);
+		stream = getPaginationStream(stream, page, size);
 		List<Article> collect = stream.collect(Collectors.toList());
 		return collect;
+	}
+
+	/**
+	 * 查询时间第page*size大的记录集</br>
+	 * 注意：返回的List是同一年的</br>
+	 * 
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	@RequestMapping("api/timeline")
+	public Map<Integer, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
+			@RequestParam("size") Long size) {
+		List<Article> allArticles = getAllArticles();
+		Stream<Article> stream = allArticles.parallelStream();
+		stream = stream.sorted(time);
+		Map<Integer, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
+			return t.getCreationDate().getYear();
+		}, toSet()));
+//		Stream<Integer> keySetStream = collect.keySet().stream();
+		TreeSet<Integer> treeSet = new TreeSet<Integer>((t1, t2) -> {
+			return t1.compareTo(t2) * -1;
+		});
+		treeSet.addAll(collect.keySet());
+		Stream<Integer> keySetStream = treeSet.stream();
+		Stream<Integer> paginationStream = getPaginationStream(keySetStream, page, size);
+		List<Integer> keyList = paginationStream.collect(toList());
+		Map<Integer, Map<Integer, Set<Article>>> result = new TreeMap<>();
+		for (Integer integer : keyList) {
+			Set<Article> list = collect.get(integer);
+			Map<Integer, Set<Article>> map = FastMap.toMap(list, (Article t) -> {
+				return t.getCreationDate().getMonth();
+			}, (t) -> {
+				return t;
+			}, () -> {
+				return new TreeMap<>((t1, t2) -> {
+					return t1 > t2 ? -1 : 1;
+				});
+			}, () -> {
+				return new TreeSet<>(time);
+			}, FastMap.SUM);
+			result.put(integer, map);
+		}
+		return result;
+	}
+
+	/**
+	 * 从流中获取分页</br>
+	 * page从1开始的话，就需要这里-1
+	 * 
+	 * @param stream
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	private <T> Stream<T> getPaginationStream(Stream<T> stream, Long page, Long size) {
+		stream = stream.skip(page * size);
+		stream = stream.limit(size);
+		return stream;
 	}
 
 	/**
@@ -98,7 +177,7 @@ public class ArticleAPIController {
 	private Predicate<Article> getFinalPredicate(Long classificationId, Long[] labels) {
 		Predicate<Article> predicateByClassfication = getPredicateByClassfication(classificationId);
 		Predicate<Article> predicateByLabels = getPredicateByLabels(labels);
-		Predicate<Article> and = predicateByClassfication.and(predicateByLabels);
+		Predicate<Article> and = andOP.apply(predicateByClassfication, predicateByLabels);
 		return and;
 	}
 
@@ -169,19 +248,21 @@ public class ArticleAPIController {
 		Article updateArticle = articleService.updateArticle(article);
 		return updateArticle;
 	}
-
-	/**
-	 * 翻页查询
-	 * 
-	 * @param size
-	 * @param page
-	 * @return
-	 */
-	@RequestMapping("api/getAllArticles/{size}/{page}")
-	public List<Article> getAllArticles(@PathVariable("size") Integer size, @PathVariable("page") Integer page) {
-		List<Article> findAllArticles = articleService.getArticlesByPage(size, page - 1);
-		return findAllArticles;
-	}
+	// /**
+	// * 翻页查询
+	// * 废弃了
+	// *
+	// * @param size
+	// * @param page
+	// * @return
+	// */
+	// @RequestMapping("api/getAllArticles/{size}/{page}")
+	// public List<Article> getAllArticles(@PathVariable("size") Integer size,
+	// @PathVariable("page") Integer page) {
+	// List<Article> findAllArticles = articleService.getArticlesByPage(size, page -
+	// 1);
+	// return findAllArticles;
+	// }
 
 	@RequestMapping("api/getCount")
 	public Double count() {
@@ -219,5 +300,18 @@ public class ArticleAPIController {
 	public List<Article> getArticlesByLabel(@PathVariable("id") Long id) {
 		List<Article> articlesByLabel = articleService.getArticlesByLabelId(id);
 		return articlesByLabel;
+	}
+
+	/**
+	 * 相当于对于每个线程加缓存
+	 * 
+	 * @return the allArticles
+	 */
+	public List<Article> getAllArticles() {
+		if (articlesCache.get() == null || articlesCache.get().isEmpty()) {
+			List<Article> findAllArticles = articleService.findAllArticles();
+			articlesCache.set(findAllArticles);
+		}
+		return articlesCache.get();
 	}
 }
