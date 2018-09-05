@@ -57,6 +57,7 @@ public class ArticleAPIController {
 	@RequestMapping("api/getArticles")
 	public List<Article> getg(@RequestParam("sort") String sort, @RequestParam("classification") Long classificationId,
 			@RequestParam("label") Long[] labels, @RequestParam("size") Long size, @RequestParam("page") Long page) {
+
 		List<Article> findAllArticles = articleService.findAllArticles();
 		/**
 		 * 按热度或者按时间排序</br>
@@ -73,10 +74,16 @@ public class ArticleAPIController {
 		default:
 			break;
 		}
-		findAllArticles.sort(comparator);
 		Stream<Article> stream = findAllArticles.stream();
 		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
-		stream.filter(finalPredicate);
+		/**
+		 * 1. 通过条件过滤</br>
+		 * 2. 根据条件排序</br>
+		 * 3. 根据参数分页</br>
+		 */
+		stream = stream.filter(finalPredicate);
+		stream = stream.sorted(comparator);
+		stream = stream.skip((page - 1) * size).limit(size);
 		List<Article> collect = stream.collect(Collectors.toList());
 		return collect;
 	}
