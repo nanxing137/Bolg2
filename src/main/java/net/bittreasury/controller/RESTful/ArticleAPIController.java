@@ -106,7 +106,7 @@ public class ArticleAPIController {
 		 */
 		stream = stream.filter(finalPredicate);
 		stream = stream.sorted(comparator);
-		stream = stream.skip((page - 1) * size).limit(size);
+//		stream = stream.skip((page - 1) * size).limit(size);
 		stream = getPaginationStream(stream, page, size);
 		List<Article> collect = stream.collect(Collectors.toList());
 		return collect;
@@ -312,7 +312,7 @@ public class ArticleAPIController {
 	 * 
 	 * @return the allArticles
 	 */
-	public List<Article> getAllArticles() {
+	private List<Article> getAllArticles() {
 		if (articlesCache.get() == null || articlesCache.get().isEmpty()) {
 			List<Article> findAllArticles = articleService.findAllArticles();
 			articlesCache.set(findAllArticles);
