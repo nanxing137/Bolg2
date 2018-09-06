@@ -37,6 +37,10 @@ public class ArticleAPIController {
 	// 注意这里有待改进
 	private ThreadLocal<List<Article>> articlesCache = new ThreadLocal<>();
 
+	private final Comparator<Integer> desc = (t1, t2) -> {
+		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
+	};
+
 	private final Comparator<Article> hot = (t1, t2) -> {
 		return (t1.getClickQuantity() > t2.getClickQuantity()) ? 1
 				: (t1.getClickQuantity() == t2.getClickQuantity() ? 0 : -1);
@@ -124,30 +128,31 @@ public class ArticleAPIController {
 		stream = stream.sorted(time);
 		Map<Integer, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
 			return t.getCreationDate().getYear();
+		}, () -> {
+			return new TreeMap<Integer, Set<Article>>(desc);
 		}, toSet()));
-//		Stream<Integer> keySetStream = collect.keySet().stream();
-		TreeSet<Integer> treeSet = new TreeSet<Integer>((t1, t2) -> {
-			return t1.compareTo(t2) * -1;
-		});
+		TreeSet<Integer> treeSet = new TreeSet<Integer>(desc);
 		treeSet.addAll(collect.keySet());
 		Stream<Integer> keySetStream = treeSet.stream();
 		Stream<Integer> paginationStream = getPaginationStream(keySetStream, page, size);
 		List<Integer> keyList = paginationStream.collect(toList());
-		Map<Integer, Map<Integer, Set<Article>>> result = new TreeMap<>();
+		Map<Integer, Map<Integer, Set<Article>>> result = new TreeMap<>(desc);
 		for (Integer integer : keyList) {
 			Set<Article> list = collect.get(integer);
-			Map<Integer, Set<Article>> map = FastMap.toMap(list, (Article t) -> {
+			TreeMap<Integer, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
 				return t.getCreationDate().getMonth();
-			}, (t) -> {
-				return t;
 			}, () -> {
-				return new TreeMap<>((t1, t2) -> {
-					return t1 > t2 ? -1 : 1;
-				});
-			}, () -> {
-				return new TreeSet<>(time);
-			}, FastMap.SUM);
-			result.put(integer, map);
+				return new TreeMap<Integer, Set<Article>>(desc);
+			}, toSet()));
+			Set<Integer> keySet = node.keySet();
+			Set<Article> temp;
+			for (Integer integer2 : keySet) {
+				temp = new TreeSet<>(time);
+				temp.addAll(node.get(integer2));
+				node.put(integer2, temp);
+			}
+			// result.put(integer, map);
+			result.put(integer, node);
 		}
 		return result;
 	}
