@@ -20,6 +20,7 @@ public class T {
         System.out.println("代码数量：" + writeLines);
         System.out.println("注释数量：" + commentLines);
         System.out.println("空行数量：" + normalLines);
+        String string = "";
         if(classcount==0){
             System.out.println("代码平均数量:" + 0);
         }else{

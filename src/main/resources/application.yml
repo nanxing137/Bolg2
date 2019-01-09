@@ -2,7 +2,7 @@ spring:
 #  freemarker: 
 #    suffix: .html
   redis:
-    host: 59.110.172.165
+    host: 132.232.101.165
     port: 6379
     password: null
     database: 2
@@ -20,9 +20,9 @@ spring:
       max-request-size: -1
       max-file-size: -1
   datasource:
-    url: jdbc:mysql://59.110.172.165:3306/blog2?characterEncoding=UTF8&useSSL=false
+    url: jdbc:mysql://132.232.101.165:3306/blog2?characterEncoding=UTF8&useSSL=false
     username: root
-    password: 321140726@gp
+    password: A321140726@gp
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:

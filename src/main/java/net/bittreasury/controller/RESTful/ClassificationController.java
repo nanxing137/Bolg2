@@ -2,6 +2,8 @@ package net.bittreasury.controller.RESTful;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ public class ClassificationController {
 	public List<Classification> getAllClassification() {
 		List<Classification> all = classificationService.getAll();
 		return all;
+		
 	}
 
 }

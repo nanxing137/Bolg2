@@ -1,12 +1,14 @@
 package net.bittreasury.controller.RESTful;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
@@ -24,11 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import net.bittreasury.entity.Article;
 import net.bittreasury.entity.User;
 import net.bittreasury.service.ArticleService;
-import net.bittreasury.utils.FastMap;
-
-import static java.util.stream.Collectors.*;
-
-import java.util.ArrayList;
 
 @RestController
 public class ArticleAPIController {
@@ -74,8 +71,10 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/getArticles")
-	public List<Article> getg(@RequestParam("sort") String sort, @RequestParam("classification") Long classificationId,
-			@RequestParam("label") Long[] labels, @RequestParam("size") Long size, @RequestParam("page") Long page) {
+	public List<Article> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
+			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
+			@RequestParam(value = "label", defaultValue = "") Long[] labels, @RequestParam("size") Long size,
+			@RequestParam("page") Long page) {
 
 		// List<Article> findAllArticles = articleService.findAllArticles();
 		List<Article> findAllArticles = getAllArticles();
@@ -97,7 +96,7 @@ public class ArticleAPIController {
 			break;
 		}
 		// 先用并行流，出了问题检查这里
-		Stream<Article> stream = findAllArticles.parallelStream();
+		Stream<Article> stream = findAllArticles.stream();
 		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
 		/**
 		 * 1. 通过条件过滤</br>
@@ -106,7 +105,7 @@ public class ArticleAPIController {
 		 */
 		stream = stream.filter(finalPredicate);
 		stream = stream.sorted(comparator);
-//		stream = stream.skip((page - 1) * size).limit(size);
+		// stream = stream.skip((page - 1) * size).limit(size);
 		stream = getPaginationStream(stream, page, size);
 		List<Article> collect = stream.collect(Collectors.toList());
 		return collect;
@@ -219,7 +218,7 @@ public class ArticleAPIController {
 	private Predicate<Article> getPredicateByClassfication(Long classificationId) {
 		Predicate<Article> predicate = (t) -> {
 			// 如果没有传入任何classificationId，直接满足条件
-			if (classificationId == null && t.getClassification().getId().equals(classificationId)) {
+			if (classificationId == null || t.getClassification().getId().equals(classificationId)) {
 				return true;
 			}
 			return false;

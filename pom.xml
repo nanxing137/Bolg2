@@ -7,7 +7,7 @@
 	<groupId>net.bittreasury</groupId>
 	<artifactId>Blog</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>Blog2</name>
 	<description>Blog2</description>
