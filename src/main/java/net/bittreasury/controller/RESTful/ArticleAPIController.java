@@ -39,6 +39,7 @@ public class ArticleAPIController {
 	};
 
 	private final Comparator<Article> hot = (t1, t2) -> {
+		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
 		return (t1.getClickQuantity() > t2.getClickQuantity()) ? 1
 				: (t1.getClickQuantity() == t2.getClickQuantity() ? 0 : -1);
 	};

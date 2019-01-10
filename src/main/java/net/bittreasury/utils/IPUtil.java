@@ -1,7 +1,5 @@
 package net.bittreasury.utils;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
