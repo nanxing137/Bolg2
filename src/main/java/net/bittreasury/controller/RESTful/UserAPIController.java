@@ -24,6 +24,12 @@ public class UserAPIController {
 		return userById;
 	}
 
+	@RequestMapping("api/getAllAuthors")
+	public List<User> getAllAuthors() {
+		List<User> allUsers = userService.getAllUsers();
+		return allUsers;
+	}
+
 	@RequestMapping("api/getRandomUser/{count}")
 	public List<User> getRandomUser(@PathVariable("count") Integer count) {
 		List<User> randomUsers = userService.getRandomUsers(count);
