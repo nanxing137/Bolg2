@@ -4,8 +4,10 @@
 package net.bittreasury.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -90,9 +92,16 @@ public class ArticleServiceImpl implements ArticleService {
 	}
 
 	@Override
-	public Long getSum() {
-		long count = articleRepository.count();
-		return count;
+	public Long getSum(Long classificationId,Long[] labels) {
+//		List<Long> longs = Arrays.asList(labels);
+//		long count;
+//		List<Article> all = articleRepository.findAll();
+//		all.stream().filter()
+//		if ("".equals(classificationId))
+//			count = articleRepository.countByLabelsContains(longs);
+//		else
+//			count = articleRepository.countByClassificationEqualsAndLabelsContains(classificationId,longs);
+		return 0l;
 	}
 
 	@Override

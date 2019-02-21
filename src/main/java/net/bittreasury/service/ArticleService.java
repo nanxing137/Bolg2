@@ -23,7 +23,7 @@ public interface ArticleService {
 	
 	Article updateArticle(Article article);
 	
-	Long getSum();
+	Long getSum(Long classificationId,Long[] labels);
 	
 	List<Article> getArticlesByTime();
 	
