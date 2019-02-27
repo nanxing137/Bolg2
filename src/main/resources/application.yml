@@ -4,7 +4,7 @@ spring:
   redis:
     host: 132.232.101.165
     port: 6379
-    password: null
+    password: A321140726@gp
     database: 2
   http:
     encoding:

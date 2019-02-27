@@ -19,4 +19,6 @@ public interface UserService {
 	
 
 	List<User> getRandomUsers(int count);
+
+	List<User> getAllUsers();
 }

@@ -65,17 +65,19 @@ public class ArticleAPIController {
 	 * 
 	 * @param sort
 	 *            定义排序方式
-	 * @param classification
+	 * @param classificationId
 	 *            定义分类
-	 * @param labels
+	 * @param labelsSt
 	 *            定义标签
 	 * @return
 	 */
 	@RequestMapping("api/getArticles")
 	public List<Article> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
 			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
-			@RequestParam(value = "label", defaultValue = "") Long[] labels, @RequestParam("size") Long size,
+			@RequestParam(value = "label", defaultValue = "") String  labelsSt, @RequestParam("size") Long size,
 			@RequestParam("page") Long page) {
+		Long[] labels=("".equals(labelsSt))?null:(Long[]) Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray();
+
 
 		// List<Article> findAllArticles = articleService.findAllArticles();
 		List<Article> findAllArticles = getAllArticles();
@@ -269,11 +271,32 @@ public class ArticleAPIController {
 	// return findAllArticles;
 	// }
 
+	/**
+	 *
+	 * @param classificationId
+	 * @param labelsSt
+	 * @return
+	 */
 	@RequestMapping("api/getCount")
+<<<<<<< HEAD
 	public Double count() {
 		Long sum = articleService.getSum();
 		double ceil = Math.ceil(sum / 3);
 		return ceil;
+=======
+	public Long count(@RequestParam(value = "classification", defaultValue = "") Long classificationId,
+	                  @RequestParam(value = "label", defaultValue = "") String  labelsSt) {
+		Long[] labels = new Long[0];
+		if (!"".equals(labelsSt)) {
+			labels = Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray(Long[]::new);
+		}
+		List<Article> allArticles = getAllArticles();
+		Stream<Article> stream = allArticles.stream();
+		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
+		long sum = stream.filter(finalPredicate).count();
+//		double ceil = Math.ceil(sum / 3);
+		return sum;
+>>>>>>> 7bc4d6019e065203325d211d8c0c6b7396596724
 	}
 
 	@RequestMapping("api/getArticle/{id}")
