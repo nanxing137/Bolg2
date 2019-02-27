@@ -278,12 +278,6 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/getCount")
-<<<<<<< HEAD
-	public Double count() {
-		Long sum = articleService.getSum();
-		double ceil = Math.ceil(sum / 3);
-		return ceil;
-=======
 	public Long count(@RequestParam(value = "classification", defaultValue = "") Long classificationId,
 	                  @RequestParam(value = "label", defaultValue = "") String  labelsSt) {
 		Long[] labels = new Long[0];
@@ -296,7 +290,7 @@ public class ArticleAPIController {
 		long sum = stream.filter(finalPredicate).count();
 //		double ceil = Math.ceil(sum / 3);
 		return sum;
->>>>>>> 7bc4d6019e065203325d211d8c0c6b7396596724
+
 	}
 
 	@RequestMapping("api/getArticle/{id}")
