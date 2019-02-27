@@ -270,10 +270,10 @@ public class ArticleAPIController {
 	// }
 
 	@RequestMapping("api/getCount")
-	public Long count() {
+	public Double count() {
 		Long sum = articleService.getSum();
-//		double ceil = Math.ceil(sum / 3);
-		return sum;
+		double ceil = Math.ceil(sum / 3);
+		return ceil;
 	}
 
 	@RequestMapping("api/getArticle/{id}")
