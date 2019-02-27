@@ -4,18 +4,14 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Sets;
+import net.bittreasury.entity.Label;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,24 +56,47 @@ public class ArticleAPIController {
 	@Autowired
 	private ArticleService articleService;
 
+	public static void main(String[] args) {
+		String labelsSt = "1,2";
+
+
+		String[] split = labelsSt.split(",");
+		List<String> strings = Arrays.asList(split);
+
+
+//		strings.stream().map((t)->Long.valueOf())
+		long[] longs = strings.stream().mapToLong((t) -> Long.valueOf(t)).toArray();
+		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong((t) -> Long.valueOf(t)).toArray();
+
+		List<Long> longs1 = Arrays.asList(1l, 2l, 3l);
+		HashSet<Long> longs3 = new HashSet<>(longs1);
+//		longs3.add(1l);
+		for (long ll :
+				longs) {
+			System.out.println(ll);
+		}
+		long[] longs2 = {1l, 2l};
+
+		System.out.println(longs3.contains(1L));
+
+//		System.out.println(longs3.containsAll(Arrays.asList(longs2)));
+//		System.out.println(Arrays.asList(longs2).containsAll(Arrays.asList(longs1)));
+	}
+
 	/**
 	 * 使用统一的文章获取接口
-	 * 
-	 * @param sort
-	 *            定义排序方式
-	 * @param classificationId
-	 *            定义分类
-	 * @param labelsSt
-	 *            定义标签
+	 *
+	 * @param sort             定义排序方式
+	 * @param classificationId 定义分类
+	 * @param labelsSt         定义标签
 	 * @return
 	 */
 	@RequestMapping("api/getArticles")
 	public List<Article> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
-			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
-			@RequestParam(value = "label", defaultValue = "") String  labelsSt, @RequestParam("size") Long size,
-			@RequestParam("page") Long page) {
-		Long[] labels=("".equals(labelsSt))?null:(Long[]) Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray();
-
+	                          @RequestParam(value = "classification", defaultValue = "") Long classificationId,
+	                          @RequestParam(value = "label", defaultValue = "") String labelsSt, @RequestParam("size") Long size,
+	                          @RequestParam("page") Long page) {
+		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong(t -> Long.valueOf(t)).toArray();
 
 		// List<Article> findAllArticles = articleService.findAllArticles();
 		List<Article> findAllArticles = getAllArticles();
@@ -88,15 +107,15 @@ public class ArticleAPIController {
 		 */
 		Comparator<Article> comparator;
 		switch (sort) {
-		case "hot":
-			comparator = hot;
-			break;
-		case "time":
-			comparator = time;
-			break;
-		default:
-			comparator = hot;
-			break;
+			case "hot":
+				comparator = hot;
+				break;
+			case "time":
+				comparator = time;
+				break;
+			default:
+				comparator = hot;
+				break;
 		}
 		// 先用并行流，出了问题检查这里
 		Stream<Article> stream = findAllArticles.stream();
@@ -117,14 +136,14 @@ public class ArticleAPIController {
 	/**
 	 * 查询时间第page*size大的记录集</br>
 	 * 注意：返回的List是同一年的</br>
-	 * 
+	 *
 	 * @param page
 	 * @param size
 	 * @return
 	 */
 	@RequestMapping("api/timeline")
 	public Map<Integer, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
-			@RequestParam("size") Long size) {
+	                                                         @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
 		Stream<Article> stream = allArticles.parallelStream();
 		stream = stream.sorted(time);
@@ -159,10 +178,29 @@ public class ArticleAPIController {
 		return result;
 	}
 
+	@RequestMapping("api/timelineCount")
+	public Integer timelineCount(@RequestParam("size") Long size) {
+		List<Article> allArticles = getAllArticles();
+		Stream<Article> stream = allArticles.parallelStream();
+		stream = stream.sorted(time);
+		Map<Integer, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
+			return t.getCreationDate().getYear();
+		}, () -> {
+			return new TreeMap<Integer, Set<Article>>(desc);
+		}, toSet()));
+		TreeSet<Integer> treeSet = new TreeSet<Integer>(desc);
+		treeSet.addAll(collect.keySet());
+		Stream<Integer> keySetStream = treeSet.stream();
+		long count = keySetStream.count();
+		double v = count / (double) size;
+
+		return (int) Math.ceil(v);
+	}
+
 	/**
 	 * 从流中获取分页</br>
 	 * page从1开始的话，就需要这里-1
-	 * 
+	 *
 	 * @param stream
 	 * @param page
 	 * @param size
@@ -176,37 +214,43 @@ public class ArticleAPIController {
 
 	/**
 	 * 返回两个过滤器的交集
-	 * 
+	 *
 	 * @param classificationId
 	 * @param labels
 	 * @return
 	 */
-	private Predicate<Article> getFinalPredicate(Long classificationId, Long[] labels) {
+	private Predicate<Article> getFinalPredicate(Long classificationId, long[] labels) {
 		Predicate<Article> predicateByClassfication = getPredicateByClassfication(classificationId);
 		Predicate<Article> predicateByLabels = getPredicateByLabels(labels);
-		Predicate<Article> and = andOP.apply(predicateByClassfication, predicateByLabels);
-		return and;
+
+		return predicateByClassfication.and(predicateByLabels);
 	}
 
 	/**
 	 * 判断标签是否全部包含
-	 * 
+	 *
 	 * @param labels
 	 * @return
 	 */
-	private Predicate<Article> getPredicateByLabels(Long[] labels) {
+	private Predicate<Article> getPredicateByLabels(long[] labels) {
 		Predicate<Article> predicate = (t) -> {
 			// 如果没有传入任何lables，直接满足条件
 			if (labels == null || labels.length == 0) {
 				return true;
 			}
-			Stream<Long> map = t.getLabels().parallelStream().map((tt) -> {
-				return tt.getId();
-			});
-			List<Long> collect = map.collect(Collectors.toList());
-			if (collect.containsAll(Arrays.asList(labels))) {
+			Stream<Long> map = t.getLabels().stream().map(Label::getId);
+
+
+			Set<Long> collect = map.collect(Collectors.toSet());
+			Set<Long> labelsSet = new HashSet<>();
+			for (long l : labels) {
+				labelsSet.add(l);
+			}
+			if (collect.containsAll(labelsSet)) {
 				return true;
 			}
+
+
 			return false;
 		};
 		return predicate;
@@ -214,7 +258,7 @@ public class ArticleAPIController {
 
 	/**
 	 * 判断分类是否正确
-	 * 
+	 *
 	 * @param classificationId
 	 * @return
 	 */
@@ -232,7 +276,7 @@ public class ArticleAPIController {
 
 	/**
 	 * 增加文章时自动添加一无标题文章
-	 * 
+	 *
 	 * @param folderId
 	 * @return
 	 */
@@ -272,17 +316,16 @@ public class ArticleAPIController {
 	// }
 
 	/**
-	 *
 	 * @param classificationId
 	 * @param labelsSt
 	 * @return
 	 */
 	@RequestMapping("api/getCount")
 	public Long count(@RequestParam(value = "classification", defaultValue = "") Long classificationId,
-	                  @RequestParam(value = "label", defaultValue = "") String  labelsSt) {
-		Long[] labels = new Long[0];
+	                  @RequestParam(value = "label", defaultValue = "") String labelsSt) {
+		long[] labels = new long[0];
 		if (!"".equals(labelsSt)) {
-			labels = Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray(Long[]::new);
+			labels = Arrays.asList(labelsSt.split(",")).stream().mapToLong((t) -> Long.parseLong(t)).toArray();
 		}
 		List<Article> allArticles = getAllArticles();
 		Stream<Article> stream = allArticles.stream();
@@ -326,7 +369,7 @@ public class ArticleAPIController {
 
 	/**
 	 * 相当于对于每个线程加缓存
-	 * 
+	 *
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
