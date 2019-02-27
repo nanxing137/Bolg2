@@ -76,7 +76,7 @@ public class ArticleAPIController {
 			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
 			@RequestParam(value = "label", defaultValue = "") String  labelsSt, @RequestParam("size") Long size,
 			@RequestParam("page") Long page) {
-		Long[] labels= (Long[]) Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray();
+		Long[] labels=("".equals(labelsSt))?null:(Long[]) Arrays.asList(labelsSt.split(",")).stream().map((t) -> (Long) Long.parseLong(t)).toArray();
 
 
 		// List<Article> findAllArticles = articleService.findAllArticles();
