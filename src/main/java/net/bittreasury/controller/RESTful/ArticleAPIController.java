@@ -33,6 +33,13 @@ public class ArticleAPIController {
 	private final Comparator<Integer> desc = (t1, t2) -> {
 		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
 	};
+	private final Comparator<String> strDesc = (t11, t21) -> {
+
+		Integer t1 = Integer.parseInt(t11);
+		Integer t2 = Integer.parseInt(t21);
+
+		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
+	};
 
 	private final Comparator<Article> hot = (t1, t2) -> {
 		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
@@ -177,23 +184,23 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/timeline")
-	public Map<Integer, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
-	                                                         @RequestParam("size") Long size) {
+	public Map<String, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
+	                                                        @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
-		Stream<Article> stream = allArticles.parallelStream();
+		Stream<Article> stream = allArticles.stream();
 		stream = stream.sorted(time);
-		Map<Integer, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
-			return t.getCreationDate().getYear();
+		Map<String, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
+			return String.valueOf(t.getCreationDate().getYear());
 		}, () -> {
-			return new TreeMap<Integer, Set<Article>>(desc);
+			return new TreeMap<String, Set<Article>>(strDesc);
 		}, toSet()));
-		TreeSet<Integer> treeSet = new TreeSet<Integer>(desc);
+		TreeSet<String> treeSet = new TreeSet<String>(strDesc);
 		treeSet.addAll(collect.keySet());
-		Stream<Integer> keySetStream = treeSet.stream();
-		Stream<Integer> paginationStream = getPaginationStream(keySetStream, page, size);
-		List<Integer> keyList = paginationStream.collect(toList());
-		Map<Integer, Map<Integer, Set<Article>>> result = new TreeMap<>(desc);
-		for (Integer integer : keyList) {
+		Stream<String> keySetStream = treeSet.stream();
+		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
+		List<String> keyList = paginationStream.collect(toList());
+		Map<String, Map<Integer, Set<Article>>> result = new TreeMap<String, Map<Integer, Set<Article>>>(strDesc);
+		for (String integer : keyList) {
 			Set<Article> list = collect.get(integer);
 			TreeMap<Integer, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
 				return t.getCreationDate().getMonth();
@@ -208,8 +215,9 @@ public class ArticleAPIController {
 				node.put(integer2, temp);
 			}
 			// result.put(integer, map);
-			result.put(integer, node);
+			result.put(integer.toString(), node);
 		}
+
 		return result;
 	}
 
