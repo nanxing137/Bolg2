@@ -184,7 +184,7 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/timeline")
-	public Map<String, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
+	public Map<String, Map<String, Set<Article>>> timeLine(@RequestParam("page") Long page,
 	                                                        @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
 		Stream<Article> stream = allArticles.stream();
@@ -199,17 +199,17 @@ public class ArticleAPIController {
 		Stream<String> keySetStream = treeSet.stream();
 		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
 		List<String> keyList = paginationStream.collect(toList());
-		Map<String, Map<Integer, Set<Article>>> result = new TreeMap<String, Map<Integer, Set<Article>>>(strDesc);
+		Map<String, Map<String , Set<Article>>> result = new TreeMap<String, Map<String , Set<Article>>>(strDesc);
 		for (String integer : keyList) {
 			Set<Article> list = collect.get(integer);
-			TreeMap<Integer, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
-				return t.getCreationDate().getMonth();
+			TreeMap<String, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
+				return String.valueOf(t.getCreationDate().getMonth());
 			}, () -> {
-				return new TreeMap<Integer, Set<Article>>(desc);
+				return new TreeMap<String, Set<Article>>(strDesc);
 			}, toSet()));
-			Set<Integer> keySet = node.keySet();
+			Set<String> keySet = node.keySet();
 			Set<Article> temp;
-			for (Integer integer2 : keySet) {
+			for (String integer2 : keySet) {
 				temp = new TreeSet<>(time);
 				temp.addAll(node.get(integer2));
 				node.put(integer2, temp);
