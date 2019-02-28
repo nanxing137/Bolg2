@@ -134,6 +134,41 @@ public class ArticleAPIController {
 	}
 
 	/**
+	 * 使用统一的文章获取接口
+	 *
+	 * @param classificationId 定义分类
+	 * @param labelsSt         定义标签
+	 * @return
+	 */
+	@RequestMapping("api/getArticlesCount")
+	public Integer getArticlesCount(
+			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
+			@RequestParam(value = "label", defaultValue = "") String labelsSt,
+			@RequestParam("size") Long size) {
+		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong(t -> Long.valueOf(t)).toArray();
+
+		// List<Article> findAllArticles = articleService.findAllArticles();
+		List<Article> findAllArticles = getAllArticles();
+
+
+		// 先用并行流，出了问题检查这里
+		Stream<Article> stream = findAllArticles.stream();
+		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
+		/**
+		 * 1. 通过条件过滤</br>
+		 * 2. 根据条件排序</br>
+		 * 3. 根据参数分页</br>
+		 */
+		stream = stream.filter(finalPredicate);
+
+		// stream = stream.skip((page - 1) * size).limit(size);
+		long count = stream.count();
+		double v = count / (double) size;
+
+		return (int) Math.ceil(v);
+	}
+
+	/**
 	 * 查询时间第page*size大的记录集</br>
 	 * 注意：返回的List是同一年的</br>
 	 *
