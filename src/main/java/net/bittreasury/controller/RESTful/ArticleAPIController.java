@@ -373,10 +373,7 @@ public class ArticleAPIController {
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
-		if (articlesCache.get() == null || articlesCache.get().isEmpty()) {
-			List<Article> findAllArticles = articleService.findAllArticles();
-			articlesCache.set(findAllArticles);
-		}
-		return articlesCache.get();
+		List<Article> findAllArticles = articleService.findAllArticles();
+		return findAllArticles;
 	}
 }
