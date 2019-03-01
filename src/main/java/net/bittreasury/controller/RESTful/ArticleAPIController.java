@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import net.bittreasury.bo.ArticleBO;
 import net.bittreasury.compareBO.DateCompareable;
 import net.bittreasury.entity.Label;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,52 +43,21 @@ public class ArticleAPIController {
 
 	private final Comparator<DateCompareable> hot = (t1, t2) -> {
 		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
-		return (t1.getClickQuantity() > t2.getClickQuantity()) ? 1
-				: (t1.getClickQuantity() == t2.getClickQuantity() ? 0 : -1);
+		return Long.compare(t2.getClickQuantity(), t1.getClickQuantity());
 	};
 	// private final Comparator<Article> time = (t1, t2) -> {
 	// return t1.getCreationDate().compareTo(t2.getCreationDate());
 	// };
 	private final Comparator<DateCompareable> time = (t1, t2) -> {
-		return t1.getCreationDate().compareTo(t2.getCreationDate()) * -1;
+		return t2.getCreationDate().compareTo(t1.getCreationDate());
 	};
-	private final Comparator<Article> year = (t1, t2) -> {
-		int year1 = t1.getCreationDate().getYear();
-		int year2 = t2.getCreationDate().getYear();
-		return year1 > year2 ? 1 : year1 == year2 ? 0 : -1;
-	};
+
 	private final BiFunction<Predicate<Article>, Predicate<Article>, Predicate<Article>> andOP = (t1, t2) -> {
 		return t1.and(t2);
 	};
 	@Autowired
 	private ArticleService articleService;
 
-	public static void main(String[] args) {
-		String labelsSt = "1,2";
-
-
-		String[] split = labelsSt.split(",");
-		List<String> strings = Arrays.asList(split);
-
-
-//		strings.stream().map((t)->Long.valueOf())
-		long[] longs = strings.stream().mapToLong((t) -> Long.valueOf(t)).toArray();
-		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong((t) -> Long.valueOf(t)).toArray();
-
-		List<Long> longs1 = Arrays.asList(1l, 2l, 3l);
-		HashSet<Long> longs3 = new HashSet<>(longs1);
-//		longs3.add(1l);
-		for (long ll :
-				longs) {
-			System.out.println(ll);
-		}
-		long[] longs2 = {1l, 2l};
-
-		System.out.println(longs3.contains(1L));
-
-//		System.out.println(longs3.containsAll(Arrays.asList(longs2)));
-//		System.out.println(Arrays.asList(longs2).containsAll(Arrays.asList(longs1)));
-	}
 
 	/**
 	 * 使用统一的文章获取接口
@@ -99,9 +69,9 @@ public class ArticleAPIController {
 	 */
 	@RequestMapping("api/getArticles")
 	public List<ArticleBO> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
-	                          @RequestParam(value = "classification", defaultValue = "") Long classificationId,
-	                          @RequestParam(value = "label", defaultValue = "") String labelsSt, @RequestParam("size") Long size,
-	                          @RequestParam("page") Long page) {
+	                            @RequestParam(value = "classification", defaultValue = "") Long classificationId,
+	                            @RequestParam(value = "label", defaultValue = "") String labelsSt, @RequestParam("size") Long size,
+	                            @RequestParam("page") Long page) {
 		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong(t -> Long.valueOf(t)).toArray();
 
 		// List<Article> findAllArticles = articleService.findAllArticles();
@@ -113,10 +83,10 @@ public class ArticleAPIController {
 		 */
 		Comparator<DateCompareable> comparator;
 		switch (sort) {
-			case "hot":
+			case "Hot":
 				comparator = hot;
 				break;
-			case "time":
+			case "Time":
 				comparator = time;
 				break;
 			default:
@@ -185,7 +155,7 @@ public class ArticleAPIController {
 	 */
 	@RequestMapping("api/timeline")
 	public Map<String, Map<String, Set<ArticleBO>>> timeLine(@RequestParam("page") Long page,
-	                                                        @RequestParam("size") Long size) {
+	                                                         @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
 		Stream<ArticleBO> stream = allArticles.stream().map(ArticleBO::new);
 		stream = stream.sorted(time);
@@ -199,7 +169,7 @@ public class ArticleAPIController {
 		Stream<String> keySetStream = treeSet.stream();
 		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
 		List<String> keyList = paginationStream.collect(toList());
-		Map<String, Map<String , Set<ArticleBO>>> result = new TreeMap<String, Map<String , Set<ArticleBO>>>(strDesc);
+		Map<String, Map<String, Set<ArticleBO>>> result = new TreeMap<String, Map<String, Set<ArticleBO>>>(strDesc);
 		for (String integer : keyList) {
 			Set<ArticleBO> list = collect.get(integer);
 			TreeMap<String, Set<ArticleBO>> node = list.stream().collect(groupingBy((ArticleBO t) -> {
