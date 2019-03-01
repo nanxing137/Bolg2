@@ -33,6 +33,13 @@ public class ArticleAPIController {
 	private final Comparator<Integer> desc = (t1, t2) -> {
 		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
 	};
+	private final Comparator<String> strDesc = (t11, t21) -> {
+
+		Integer t1 = Integer.parseInt(t11);
+		Integer t2 = Integer.parseInt(t21);
+
+		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
+	};
 
 	private final Comparator<Article> hot = (t1, t2) -> {
 		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
@@ -134,6 +141,41 @@ public class ArticleAPIController {
 	}
 
 	/**
+	 * 使用统一的文章获取接口
+	 *
+	 * @param classificationId 定义分类
+	 * @param labelsSt         定义标签
+	 * @return
+	 */
+	@RequestMapping("api/getArticlesCount")
+	public Integer getArticlesCount(
+			@RequestParam(value = "classification", defaultValue = "") Long classificationId,
+			@RequestParam(value = "label", defaultValue = "") String labelsSt,
+			@RequestParam("size") Long size) {
+		long[] labels = ("".equals(labelsSt)) ? null : Arrays.asList(labelsSt.split(",")).stream().mapToLong(t -> Long.valueOf(t)).toArray();
+
+		// List<Article> findAllArticles = articleService.findAllArticles();
+		List<Article> findAllArticles = getAllArticles();
+
+
+		// 先用并行流，出了问题检查这里
+		Stream<Article> stream = findAllArticles.stream();
+		Predicate<Article> finalPredicate = getFinalPredicate(classificationId, labels);
+		/**
+		 * 1. 通过条件过滤</br>
+		 * 2. 根据条件排序</br>
+		 * 3. 根据参数分页</br>
+		 */
+		stream = stream.filter(finalPredicate);
+
+		// stream = stream.skip((page - 1) * size).limit(size);
+		long count = stream.count();
+		double v = count / (double) size;
+
+		return (int) Math.ceil(v);
+	}
+
+	/**
 	 * 查询时间第page*size大的记录集</br>
 	 * 注意：返回的List是同一年的</br>
 	 *
@@ -142,39 +184,40 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/timeline")
-	public Map<Integer, Map<Integer, Set<Article>>> timeLine(@RequestParam("page") Long page,
-	                                                         @RequestParam("size") Long size) {
+	public Map<String, Map<String, Set<Article>>> timeLine(@RequestParam("page") Long page,
+	                                                        @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
-		Stream<Article> stream = allArticles.parallelStream();
+		Stream<Article> stream = allArticles.stream();
 		stream = stream.sorted(time);
-		Map<Integer, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
-			return t.getCreationDate().getYear();
+		Map<String, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
+			return String.valueOf(t.getCreationDate().getYear());
 		}, () -> {
-			return new TreeMap<Integer, Set<Article>>(desc);
+			return new TreeMap<String, Set<Article>>(strDesc);
 		}, toSet()));
-		TreeSet<Integer> treeSet = new TreeSet<Integer>(desc);
+		TreeSet<String> treeSet = new TreeSet<String>(strDesc);
 		treeSet.addAll(collect.keySet());
-		Stream<Integer> keySetStream = treeSet.stream();
-		Stream<Integer> paginationStream = getPaginationStream(keySetStream, page, size);
-		List<Integer> keyList = paginationStream.collect(toList());
-		Map<Integer, Map<Integer, Set<Article>>> result = new TreeMap<>(desc);
-		for (Integer integer : keyList) {
+		Stream<String> keySetStream = treeSet.stream();
+		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
+		List<String> keyList = paginationStream.collect(toList());
+		Map<String, Map<String , Set<Article>>> result = new TreeMap<String, Map<String , Set<Article>>>(strDesc);
+		for (String integer : keyList) {
 			Set<Article> list = collect.get(integer);
-			TreeMap<Integer, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
-				return t.getCreationDate().getMonth();
+			TreeMap<String, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
+				return String.valueOf(t.getCreationDate().getMonth());
 			}, () -> {
-				return new TreeMap<Integer, Set<Article>>(desc);
+				return new TreeMap<String, Set<Article>>(strDesc);
 			}, toSet()));
-			Set<Integer> keySet = node.keySet();
+			Set<String> keySet = node.keySet();
 			Set<Article> temp;
-			for (Integer integer2 : keySet) {
+			for (String integer2 : keySet) {
 				temp = new TreeSet<>(time);
 				temp.addAll(node.get(integer2));
 				node.put(integer2, temp);
 			}
 			// result.put(integer, map);
-			result.put(integer, node);
+			result.put(integer.toString(), node);
 		}
+
 		return result;
 	}
 
