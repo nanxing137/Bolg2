@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
+import net.bittreasury.bo.ArticleBO;
+import net.bittreasury.compareBO.DateCompareable;
 import net.bittreasury.entity.Label;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +28,6 @@ import net.bittreasury.service.ArticleService;
 @RestController
 public class ArticleAPIController {
 
-	// 线程级别的缓存
-	// 注意这里有待改进
-	private ThreadLocal<List<Article>> articlesCache = new ThreadLocal<>();
 
 	private final Comparator<Integer> desc = (t1, t2) -> {
 		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
@@ -41,7 +40,7 @@ public class ArticleAPIController {
 		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
 	};
 
-	private final Comparator<Article> hot = (t1, t2) -> {
+	private final Comparator<DateCompareable> hot = (t1, t2) -> {
 		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
 		return (t1.getClickQuantity() > t2.getClickQuantity()) ? 1
 				: (t1.getClickQuantity() == t2.getClickQuantity() ? 0 : -1);
@@ -49,7 +48,7 @@ public class ArticleAPIController {
 	// private final Comparator<Article> time = (t1, t2) -> {
 	// return t1.getCreationDate().compareTo(t2.getCreationDate());
 	// };
-	private final Comparator<Article> time = (t1, t2) -> {
+	private final Comparator<DateCompareable> time = (t1, t2) -> {
 		return t1.getCreationDate().compareTo(t2.getCreationDate()) * -1;
 	};
 	private final Comparator<Article> year = (t1, t2) -> {
@@ -99,7 +98,7 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/getArticles")
-	public List<Article> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
+	public List<ArticleBO> getg(@RequestParam(value = "sort", defaultValue = "hot") String sort,
 	                          @RequestParam(value = "classification", defaultValue = "") Long classificationId,
 	                          @RequestParam(value = "label", defaultValue = "") String labelsSt, @RequestParam("size") Long size,
 	                          @RequestParam("page") Long page) {
@@ -112,7 +111,7 @@ public class ArticleAPIController {
 		 * 按热度或者按时间排序</br>
 		 * 默认热度
 		 */
-		Comparator<Article> comparator;
+		Comparator<DateCompareable> comparator;
 		switch (sort) {
 			case "hot":
 				comparator = hot;
@@ -136,7 +135,8 @@ public class ArticleAPIController {
 		stream = stream.sorted(comparator);
 		// stream = stream.skip((page - 1) * size).limit(size);
 		stream = getPaginationStream(stream, page, size);
-		List<Article> collect = stream.collect(Collectors.toList());
+		List<ArticleBO> collect = stream.map(ArticleBO::new).collect(Collectors.toList());
+
 		return collect;
 	}
 
@@ -184,31 +184,31 @@ public class ArticleAPIController {
 	 * @return
 	 */
 	@RequestMapping("api/timeline")
-	public Map<String, Map<String, Set<Article>>> timeLine(@RequestParam("page") Long page,
+	public Map<String, Map<String, Set<ArticleBO>>> timeLine(@RequestParam("page") Long page,
 	                                                        @RequestParam("size") Long size) {
 		List<Article> allArticles = getAllArticles();
-		Stream<Article> stream = allArticles.stream();
+		Stream<ArticleBO> stream = allArticles.stream().map(ArticleBO::new);
 		stream = stream.sorted(time);
-		Map<String, Set<Article>> collect = stream.collect(groupingBy((Article t) -> {
+		Map<String, Set<ArticleBO>> collect = stream.collect(groupingBy((ArticleBO t) -> {
 			return String.valueOf(t.getCreationDate().getYear());
 		}, () -> {
-			return new TreeMap<String, Set<Article>>(strDesc);
+			return new TreeMap<String, Set<ArticleBO>>(strDesc);
 		}, toSet()));
 		TreeSet<String> treeSet = new TreeSet<String>(strDesc);
 		treeSet.addAll(collect.keySet());
 		Stream<String> keySetStream = treeSet.stream();
 		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
 		List<String> keyList = paginationStream.collect(toList());
-		Map<String, Map<String , Set<Article>>> result = new TreeMap<String, Map<String , Set<Article>>>(strDesc);
+		Map<String, Map<String , Set<ArticleBO>>> result = new TreeMap<String, Map<String , Set<ArticleBO>>>(strDesc);
 		for (String integer : keyList) {
-			Set<Article> list = collect.get(integer);
-			TreeMap<String, Set<Article>> node = list.stream().collect(groupingBy((Article t) -> {
+			Set<ArticleBO> list = collect.get(integer);
+			TreeMap<String, Set<ArticleBO>> node = list.stream().collect(groupingBy((ArticleBO t) -> {
 				return String.valueOf(t.getCreationDate().getMonth());
 			}, () -> {
-				return new TreeMap<String, Set<Article>>(strDesc);
+				return new TreeMap<String, Set<ArticleBO>>(strDesc);
 			}, toSet()));
 			Set<String> keySet = node.keySet();
-			Set<Article> temp;
+			Set<ArticleBO> temp;
 			for (String integer2 : keySet) {
 				temp = new TreeSet<>(time);
 				temp.addAll(node.get(integer2));
@@ -217,7 +217,6 @@ public class ArticleAPIController {
 			// result.put(integer, map);
 			result.put(integer.toString(), node);
 		}
-
 		return result;
 	}
 

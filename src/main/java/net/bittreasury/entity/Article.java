@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
+import net.bittreasury.compareBO.DateCompareable;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -25,26 +26,25 @@ import com.alibaba.fastjson.serializer.Labels;
 
 /**
  * 文章表
- * 
- * @author Thornhill
  *
+ * @author Thornhill
  */
 @Entity
-public class Article implements Serializable {
+public class Article implements Serializable, DateCompareable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 	@Column(nullable = false)
 	private String title;
-	@ManyToOne(targetEntity = User.class, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE }, fetch = FetchType.EAGER, optional = true)
+	@ManyToOne(targetEntity = User.class, cascade = {CascadeType.PERSIST,
+			CascadeType.MERGE}, fetch = FetchType.EAGER, optional = true)
 	private User author;
 	// 标签
 	@ManyToMany(mappedBy = "articles", fetch = FetchType.EAGER)
 	private Set<Label> labels;
 	// 分类
-	@ManyToOne(targetEntity = Classification.class, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE }, fetch = FetchType.EAGER, optional = true)
+	@ManyToOne(targetEntity = Classification.class, cascade = {CascadeType.PERSIST,
+			CascadeType.MERGE}, fetch = FetchType.EAGER, optional = true)
 	private Classification classification;
 	// 简介
 	@Column
@@ -67,7 +67,7 @@ public class Article implements Serializable {
 	@Version
 	private Long version;
 	// 附件列表
-	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "article")
+	@OneToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE}, fetch = FetchType.EAGER, mappedBy = "article")
 	private Set<Annex> annexs = new HashSet<>();
 
 	@Override
@@ -87,8 +87,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param id
-	 *            the id to set
+	 * @param id the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;
@@ -102,8 +101,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param title
-	 *            the title to set
+	 * @param title the title to set
 	 */
 	public void setTitle(String title) {
 		this.title = title;
@@ -117,8 +115,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param author
-	 *            the author to set
+	 * @param author the author to set
 	 */
 	public void setAuthor(User author) {
 		this.author = author;
@@ -132,8 +129,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param content
-	 *            the content to set
+	 * @param content the content to set
 	 */
 	public void setContent(String content) {
 		this.content = content;
@@ -147,8 +143,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param creationDate
-	 *            the creationDate to set
+	 * @param creationDate the creationDate to set
 	 */
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
@@ -162,8 +157,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param modifiedDate
-	 *            the modifiedDate to set
+	 * @param modifiedDate the modifiedDate to set
 	 */
 	public void setModifiedDate(Date modifiedDate) {
 		this.modifiedDate = modifiedDate;
@@ -177,8 +171,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param version
-	 *            the version to set
+	 * @param version the version to set
 	 */
 	public void setVersion(Long version) {
 		this.version = version;
@@ -192,8 +185,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param annexs
-	 *            the annexs to set
+	 * @param annexs the annexs to set
 	 */
 	public void setAnnexs(Set<Annex> annexs) {
 		this.annexs = annexs;
@@ -207,8 +199,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param clickQuantity
-	 *            the clickQuantity to set
+	 * @param clickQuantity the clickQuantity to set
 	 */
 	public void setClickQuantity(Long clickQuantity) {
 		this.clickQuantity = clickQuantity;
@@ -222,8 +213,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param introduction
-	 *            the introduction to set
+	 * @param introduction the introduction to set
 	 */
 	public void setIntroduction(String introduction) {
 		this.introduction = introduction;
@@ -237,8 +227,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param classification
-	 *            the classification to set
+	 * @param classification the classification to set
 	 */
 	public void setClassification(Classification classification) {
 		this.classification = classification;
@@ -252,8 +241,7 @@ public class Article implements Serializable {
 	}
 
 	/**
-	 * @param labels
-	 *            the labels to set
+	 * @param labels the labels to set
 	 */
 	public void setLabels(Set<Label> labels) {
 		this.labels = labels;
