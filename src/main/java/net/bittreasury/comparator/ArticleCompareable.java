@@ -1,8 +1,8 @@
-package net.bittreasury.compareBO;
+package net.bittreasury.comparator;
 
 import java.util.Date;
 
-public interface DateCompareable {
+public interface ArticleCompareable {
 	Date getCreationDate() ;
 	Long getClickQuantity();
 }

@@ -1,9 +1,8 @@
 package net.bittreasury.bo;
 
 import com.alibaba.fastjson.JSON;
-import jdk.nashorn.internal.ir.Labels;
 import lombok.Data;
-import net.bittreasury.compareBO.DateCompareable;
+import net.bittreasury.comparator.ArticleCompareable;
 import net.bittreasury.entity.*;
 import org.hibernate.annotations.Type;
 
@@ -14,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
-public class ArticleBO implements DateCompareable {
+public class ArticleBO implements ArticleCompareable {
 
 	private Long id;
 

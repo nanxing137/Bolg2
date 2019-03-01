@@ -10,11 +10,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Sets;
 import net.bittreasury.bo.ArticleBO;
-import net.bittreasury.compareBO.DateCompareable;
+import net.bittreasury.comparator.ArticleCompareable;
 import net.bittreasury.entity.Label;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,14 +39,12 @@ public class ArticleAPIController {
 		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
 	};
 
-	private final Comparator<DateCompareable> hot = (t1, t2) -> {
+	private final Comparator<ArticleCompareable> hot = (t1, t2) -> {
 		int compare = Long.compare(t1.getClickQuantity(), t2.getClickQuantity());
 		return Long.compare(t2.getClickQuantity(), t1.getClickQuantity());
 	};
-	// private final Comparator<Article> time = (t1, t2) -> {
-	// return t1.getCreationDate().compareTo(t2.getCreationDate());
-	// };
-	private final Comparator<DateCompareable> time = (t1, t2) -> {
+
+	private final Comparator<ArticleCompareable> time = (t1, t2) -> {
 		return t2.getCreationDate().compareTo(t1.getCreationDate());
 	};
 
@@ -81,7 +77,7 @@ public class ArticleAPIController {
 		 * 按热度或者按时间排序</br>
 		 * 默认热度
 		 */
-		Comparator<DateCompareable> comparator;
+		Comparator<ArticleCompareable> comparator;
 		switch (sort) {
 			case "Hot":
 				comparator = hot;

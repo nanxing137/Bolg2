@@ -17,12 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
-import net.bittreasury.compareBO.DateCompareable;
-import org.hibernate.annotations.GenericGenerator;
+import net.bittreasury.comparator.ArticleCompareable;
 import org.hibernate.annotations.Type;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.Labels;
 
 /**
  * 文章表
@@ -30,7 +28,7 @@ import com.alibaba.fastjson.serializer.Labels;
  * @author Thornhill
  */
 @Entity
-public class Article implements Serializable, DateCompareable {
+public class Article implements Serializable, ArticleCompareable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
