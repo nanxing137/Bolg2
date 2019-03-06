@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import net.bittreasury.bo.ArticleBO;
 import net.bittreasury.comparator.ArticleCompareable;
 import net.bittreasury.entity.Label;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,8 +38,8 @@ public class ArticleAPIController {
 
 		Integer t1 = Integer.parseInt(t11);
 		Integer t2 = Integer.parseInt(t21);
-
-		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
+		return Integer.compare(t2,t1);
+//		return (t1 > t2) ? -1 : ((t1 == t2) ? 0 : 1);
 	};
 
 	private final Comparator<ArticleCompareable> hot = (t1, t2) -> {
@@ -166,6 +167,8 @@ public class ArticleAPIController {
 		Map<String, Map<String, Set<ArticleBO>>> result = new TreeMap<String, Map<String, Set<ArticleBO>>>(strDesc);
 		for (String s : keyList) {
 			Set<ArticleBO> list = collect.get(s);
+			if (CollectionUtils.isEmpty(list))
+				continue;
 			TreeMap<String, Set<ArticleBO>> node = list.stream().collect(groupingBy((ArticleBO t) -> {
 				return String.valueOf(t.getCreationDate().getMonth() + 1);
 			}, () -> {
@@ -384,7 +387,7 @@ public class ArticleAPIController {
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
-//		List<Article> findAllArticles = articleService.findAllArticles();
-		return allArticles;
+		List<Article> findAllArticles = articleService.findAllArticles();
+		return findAllArticles;
 	}
 }
