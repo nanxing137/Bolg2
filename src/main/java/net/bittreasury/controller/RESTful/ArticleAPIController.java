@@ -387,7 +387,7 @@ public class ArticleAPIController {
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
-		List<Article> findAllArticles = articleService.findAllArticles();
-		return findAllArticles;
+//		List<Article> findAllArticles = articleService.findAllArticles();
+		return allArticles;
 	}
 }
