@@ -162,8 +162,8 @@ public class ArticleAPIController {
 		Stream<String> paginationStream = getPaginationStream(keySetStream, page, size);
 		List<String> keyList = paginationStream.collect(toList());
 		Map<String, Map<String, Set<ArticleBO>>> result = new TreeMap<String, Map<String, Set<ArticleBO>>>(strDesc);
-		for (String integer : keyList) {
-			Set<ArticleBO> list = collect.get(integer);
+		for (String s : keyList) {
+			Set<ArticleBO> list = collect.get(s);
 			TreeMap<String, Set<ArticleBO>> node = list.stream().collect(groupingBy((ArticleBO t) -> {
 				return String.valueOf(t.getCreationDate().getMonth() + 1);
 			}, () -> {
@@ -177,7 +177,7 @@ public class ArticleAPIController {
 				node.put(integer2, temp);
 			}
 			// result.put(integer, map);
-			result.put(integer.toString(), node);
+			result.put(s, node);
 		}
 		return result;
 	}
