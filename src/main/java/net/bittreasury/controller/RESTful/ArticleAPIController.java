@@ -156,7 +156,7 @@ public class ArticleAPIController {
 		Stream<ArticleBO> stream = allArticles.stream().map(ArticleBO::new);
 		stream = stream.sorted(time);
 		Map<String, Set<ArticleBO>> collect = stream.collect(groupingBy((ArticleBO t) -> {
-			return String.valueOf(t.getCreationDate().getYear());
+			return String.valueOf(t.getCreationDate().getYear() + 1900);
 		}, () -> {
 			return new TreeMap<String, Set<ArticleBO>>(strDesc);
 		}, toSet()));
@@ -169,7 +169,7 @@ public class ArticleAPIController {
 		for (String integer : keyList) {
 			Set<ArticleBO> list = collect.get(integer);
 			TreeMap<String, Set<ArticleBO>> node = list.stream().collect(groupingBy((ArticleBO t) -> {
-				return String.valueOf(t.getCreationDate().getMonth());
+				return String.valueOf(t.getCreationDate().getMonth() + 1);
 			}, () -> {
 				return new TreeMap<String, Set<ArticleBO>>(strDesc);
 			}, toSet()));
