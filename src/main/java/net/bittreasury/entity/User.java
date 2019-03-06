@@ -75,11 +75,11 @@ public class User implements Serializable {
 	// 因为不可能删除用户，也不会删除登陆记录
 	// 所以cascade可以为ALL
 	@JSONField(serialize = false)
-	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "user")
+	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "user")
 	private Set<LandingHistory> landingHistories = new HashSet<>();
 	// 文章
 	@JSONField(serialize = false)
-	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "author")
+	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "author")
 	private Set<Article> articles = new HashSet<>();
 
 	// 附件列表

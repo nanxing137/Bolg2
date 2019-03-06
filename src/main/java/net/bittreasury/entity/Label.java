@@ -3,15 +3,7 @@ package net.bittreasury.entity;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -30,7 +22,7 @@ public class Label implements Serializable {
 	private String name;
 
 	@JSONField(serialize = false)
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "label_article", joinColumns = {
 			@JoinColumn(name = "LABEL_ID", referencedColumnName = "ID") }, inverseJoinColumns = {
 					@JoinColumn(name = "ARTICLE_ID", referencedColumnName = "ID") })
