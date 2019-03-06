@@ -375,13 +375,16 @@ public class ArticleAPIController {
 
 	private final List<Article> allArticles = new ArrayList<>();
 
-
+	@PostConstruct
+	private void load() {
+		allArticles.addAll(articleService.findAllArticles());
+	}
 
 	/**
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
-		List<Article> findAllArticles = articleService.findAllArticles();
-		return findAllArticles;
+//		List<Article> findAllArticles = articleService.findAllArticles();
+		return allArticles;
 	}
 }
