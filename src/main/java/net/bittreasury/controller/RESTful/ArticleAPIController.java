@@ -24,6 +24,8 @@ import net.bittreasury.entity.Article;
 import net.bittreasury.entity.User;
 import net.bittreasury.service.ArticleService;
 
+import javax.annotation.PostConstruct;
+
 @RestController
 public class ArticleAPIController {
 
@@ -371,13 +373,18 @@ public class ArticleAPIController {
 		return articlesByLabel;
 	}
 
+	private final List<Article> allArticles = new ArrayList<>();
+
+	@PostConstruct
+	private void load() {
+		allArticles.addAll(articleService.findAllArticles());
+	}
+
 	/**
-	 * 相当于对于每个线程加缓存
-	 *
 	 * @return the allArticles
 	 */
 	private List<Article> getAllArticles() {
-		List<Article> findAllArticles = articleService.findAllArticles();
-		return findAllArticles;
+//		List<Article> findAllArticles = articleService.findAllArticles();
+		return allArticles;
 	}
 }
