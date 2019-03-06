@@ -22,10 +22,10 @@ public class ArticleBO implements ArticleCompareable {
 	private String author;
 	// 标签
 
-	private Set<String> labels;
+	private Set<LabelsBO> labels;
 	// 分类
 
-	private String classification;
+	private ClassificationBO classification;
 	// 简介
 
 	private String introduction;
@@ -57,8 +57,8 @@ public class ArticleBO implements ArticleCompareable {
 		this.setId(article.getId());
 		this.setTitle(article.getTitle());
 		this.setAuthor(article.getAuthor().getNickName());
-		this.setLabels(article.getLabels().stream().map(Label::getName).collect(Collectors.toSet()));
-		this.setClassification(article.getClassification().getName());
+		this.setLabels(article.getLabels().stream().map(LabelsBO::new).collect(Collectors.toSet()));
+		this.setClassification(new ClassificationBO(article.getClassification()));
 		this.setIntroduction(article.getIntroduction());
 		this.setContent(article.getContent());
 		this.setClickQuantity(article.getClickQuantity());
